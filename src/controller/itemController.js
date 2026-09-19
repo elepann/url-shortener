@@ -1,3 +1,4 @@
+const { PassThrough } = require('stream');
 const db = require('../config/database');
 const urlValidation = require('../config/schema');
 const crypto = require('crypto');
@@ -85,14 +86,20 @@ const updateURL = (req, res) => {
 };
 
 const deleteURL = (req, res) => {
-    const query = 'DELETE FROM shorter_url WHERE short_code = ?'
+    const deleteQuery = 'DELETE FROM shorter_url WHERE short_code = ?'
     const shortCode = req.params.shortCode;
 
-    db.query(query, [shortCode], (err, result) => {
-        if (err) return res.status(500).json({err: err.message});
+    db.query(deleteQuery, [shortCode], (err, result) => {
+        if (err) return res.status(500).json({
+            message: err.message
+        });
 
-        if(result.affectedRows > 0) {
-            return res.status(204).json({message: 'URL Deleted'});
+        if(result.affectedRows === 1) {
+            return res.status(204);
+        }else {
+            return res.status(404).json({
+                message: 'No URL Found'
+            });
         };
     });
 };
