@@ -1,4 +1,3 @@
-const { PassThrough } = require('stream');
 const db = require('../config/database');
 const urlValidation = require('../config/schema');
 const crypto = require('crypto');
@@ -48,19 +47,19 @@ const postOriginalUrl = (req, res) => {
 };
 
 const retrieveURL = (req, res) => {
-    const query = 'SELECT id, short_code, original_url, time_stamps FROM shorter_url WHERE short_code = ?';
-    const short_code = req.params.shortCode;
+    const query = 'SELECT original_url from shorter_url where short_code = ?';
+    const shortCode = req.params.shortCode;
 
-    db.query(query, [short_code], (err, result) => {
-        if (err) return res.status(404).json({error: "Data Not Found", errMess: err.message});
+
+    db.query(query, [shortCode], (err, result) => {
+        if (err) return res.status(500).json({
+            message: err.message
+        });
 
         if (result) {
-            res.status(200).json({
-                message: 'Successfully retrieved URL',
-                data: result
-            })
+            res.redirect(result[0].original_url);
         };
-    })
+    })  
 }
 
 const updateURL = (req, res) => {
