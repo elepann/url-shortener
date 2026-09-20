@@ -48,19 +48,30 @@ const postOriginalUrl = (req, res) => {
 
 const retrieveURL = (req, res) => {
     const query = 'SELECT original_url from shorter_url where short_code = ?';
+    const updateQuery = 'update shorter_url set click_count = click_count + 1 where short_code = ?';
     const shortCode = req.params.shortCode;
 
 
-    db.query(query, [shortCode], (err, result) => {
+    // db.query(query, [shortCode], (err, result) => {
+    //     if (err) return res.status(500).json({
+    //         message: err.message
+    //     });
+
+    //     if (result) {
+    //         return res.redirect(result[0].original_url);
+    //     };
+    // })  
+
+    db.query(updateQuery, [shortCode], (err, result) => {
         if (err) return res.status(500).json({
             message: err.message
         });
 
-        if (result) {
-            res.redirect(result[0].original_url);
-        };
-    })  
-}
+        db.query(query, [shortCode], (err, result) => {
+            return res.redirect(result[0].original_url);
+        });
+    });
+};
 
 const updateURL = (req, res) => {
     const {error, value} = urlValidation.validate(req.body); //data url baru
