@@ -48,14 +48,17 @@ const postOriginalUrl = (req, res) => {
 };
 
 const retrieveURL = (req, res) => {
-    const query = 'SELECT * FROM shorter_url WHERE short_code = ?';
+    const query = 'SELECT id, short_code, original_url, time_stamps FROM shorter_url WHERE short_code = ?';
     const short_code = req.params.shortCode;
 
     db.query(query, [short_code], (err, result) => {
         if (err) return res.status(404).json({error: "Data Not Found", errMess: err.message});
 
         if (result) {
-            res.send(result);
+            res.status(200).json({
+                message: 'Successfully retrieved URL',
+                data: result
+            })
         };
     })
 }
@@ -104,4 +107,20 @@ const deleteURL = (req, res) => {
     });
 };
 
-module.exports = { postOriginalUrl, retrieveURL, updateURL, deleteURL }; 
+const getURLstats = (req, res) => {
+    const query = 'SELECT id, short_code, original_url, click_count, time_stamps FROM shorter_url WHERE short_code = ?';
+    const shortCode = req.params.shortCode;
+
+    db.query(query, [shortCode], (err, result) => {
+        if (err) return res.status(500).json({message: err.message});
+
+        if(result) {
+            return res.status(200).json({
+                message: 'Successfully retrieved url Stats',
+                data: result
+            });
+        };
+    });
+};
+
+module.exports = { postOriginalUrl, retrieveURL, updateURL, deleteURL, getURLstats }; 
